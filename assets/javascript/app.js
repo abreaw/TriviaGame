@@ -6,6 +6,8 @@
 
 // timer amount for each question
 var totalTime = 15; // 15 secs
+// timer for between questions
+var betweenQsTime = 5; // 5 secs
 // answer selected by user (could be a local variable?)
 var answerSelected;
 // total correct answer count
@@ -22,10 +24,25 @@ var maxQuestionCount = 10; // 10 questions asked to the user total
 var maxQuestionsAvailable = 4; // update this to be equal to all the question objects added below
 // current correct answer
 var currentRightAnswer;
+// current question object
+var currentQuestObj;
 // times up variable
 var timesUp = false;
+// wrong answer selected variable
+var wrongAnswer = false;
 // timer ID
 var intervalID;
+
+// create an object that sets up the possible user messages displayed during the game
+var userMessages = {
+    // types of messages w/ values
+    timesUpMsg: "Sorry you didn't select an answer in time.",
+    wrongAnsMsg: "That is not the correct answer.",
+    attackEnemy: "Click the 'Attack' button to battle.",
+    youLost: "You have been defeated! Pick wisely next time you must!",
+    youWon: "Yay! You won!",
+
+};
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -81,6 +98,23 @@ var q4 = {
 var availableQuestions = []; 
 
 
+// ----------------------------------------------------------------------------------------------------
+// Grab all div objects that will be updated throughout the game
+// ----------------------------------------------------------------------------------------------------
+
+// find the #question-view div to put the question into
+var newQuestionDiv = $("#question-view");
+// find the #answer-choices div to put the answer into
+var newAnswerDiv = $("#answer-choices");
+// grab timer div items
+var timerDiv = $("#timing-view");
+var timerCountSpan = $("#timer-count");
+
+
+// ----------------------------------------------------------------------------------------------------
+// setup the game
+// ----------------------------------------------------------------------------------------------------
+
 // get questions into the array for game play
 loadAvailableQuestions();
 // create the button for the user to start the game
@@ -127,7 +161,7 @@ $("#start-btn").on("click", function() {
 	
 	// do {
 
-	showTriviaQuestion();
+	showTriviaQuestion(true);
 
 	// } while (!timesUp && totalQuestionsAsked <= maxQuestionsAvailable);
 		
@@ -136,8 +170,6 @@ $("#start-btn").on("click", function() {
 	// // setup the answers for the new question
 	// loadAnswerView();
 	$("#start-btn").css("visibility","hidden");
-
-
 
 });
 
@@ -148,14 +180,11 @@ $("#start-btn").on("click", function() {
 // ----------------------------------------------------------------------------------------------------
 function loadQuestionView() {
 
-	// find the #question-view div to put the question into
-	var newQuestionDiv = $("#question-view");
-
-	// grab the question using the totalQuestionsAsked variable as a counter
-	var newQuestion = availableQuestions[totalQuestionsAsked].question;
+	// grab the current question object for use in other functions
+	currentQuestObj = availableQuestions[totalQuestionsAsked]
 
 	// put the new Question into the div for user to see
-	newQuestionDiv.text(newQuestion);
+	newQuestionDiv.text(currentQuestObj.question);
 
 }
 
@@ -166,18 +195,16 @@ function loadQuestionView() {
 // ----------------------------------------------------------------------------------------------------
 function loadAnswerView() {
 
-	// find the #answer-choices div to put the answer into
-	var newAnswerDiv = $("#answer-choices");
 	// variable to hold the new answer choices divs
 	var newAnswerChoices = "";
 
 	// loop through the possible answers for the question
-	for (var i = 0; i < availableQuestions[totalQuestionsAsked].answerChoices.length; i++) {
+	for (var i = 0; i < currentQuestObj.answerChoices.length; i++) { 
 		
 		// create new divs with each answer choice inside
 		var newAnswerChoiceDiv = $("<div>");
 		// add the answer choice text to the new div
-		newAnswerChoiceDiv.text(availableQuestions[totalQuestionsAsked].answerChoices[i]);
+		newAnswerChoiceDiv.text(currentQuestObj.answerChoices[i]);
 		// add an id to the answer choice div
 		newAnswerChoiceDiv.attr("id", i);
 
@@ -188,26 +215,23 @@ function loadAnswerView() {
 		
 	}
 	
-	// grab the right answer for later evaluation
-	currentRightAnswer = availableQuestions[totalQuestionsAsked].correctAnswer;
-	// console.log(currentRightAnswer);
-
 }
 
 function loadTimerView() {
 
 	// grab timer div items
-	var timerDiv = $("#timing-view");
-	console.log(timerDiv);
-
-	timerDiv.prepend("Time Remaining: ")
+	// var timerDiv = $("#timing-view");
+	
+	// add text to the timer div
+	timerDiv.prepend("Time Remaining: ");
+	timerCountSpan.text(timeRemaining);
 
 }
 
 
 function timerCountDown() {
 
-	var timerCountSpan = $("#timer-count");
+	// var timerCountSpan = $("#timer-count");
 	
 	// add count to the user view
 	timerCountSpan.text(timeRemaining);
@@ -221,7 +245,11 @@ function timerCountDown() {
         // tell user time is up
         timerCountSpan.text("Times Up!");
 
+        // set timesUp variable to true
+        timesUp = true;
+
         // run correct answer view
+        setupCorrectAnsView();
 	}
 
 	timeRemaining--;
@@ -232,7 +260,15 @@ function timerCountDown() {
 // ----------------------------------------------------------------------------------------------------
 //  show trivia question to user
 // ----------------------------------------------------------------------------------------------------
-function showTriviaQuestion() {
+function showTriviaQuestion(isNewGame) {
+
+	if (!isNewGame) {
+		// refresh the divs / variables
+		resetQuestionItems();
+	}
+	
+	// set timer to total amount available
+	timeRemaining = totalTime;
 
 	// setup the question view
 	loadQuestionView();
@@ -241,8 +277,8 @@ function showTriviaQuestion() {
 	// setup timer view
 	loadTimerView();
 
-	// set timer to total amount available
-	timeRemaining = totalTime;
+	// // set timer to total amount available
+	// timeRemaining = totalTime;
 
 	// set up the timerCountDown function to run every sec (1000ms)
 	intervalID = setInterval(timerCountDown, 1000);
@@ -255,18 +291,48 @@ function showTriviaQuestion() {
 
 
 // ----------------------------------------------------------------------------------------------------
-// 
+//  load correct answer view
 // ----------------------------------------------------------------------------------------------------
+function setupCorrectAnsView() {
 
+	// add user message to newQuestionDiv
+	if (timesUp) {
+		newQuestionDiv.text(userMessages.timesUpMsg);
+	}
 
+	if (wrongAnswer) {
+		newQuestionDiv.text(userMessages.wrongAnsMsg);
+	}
 
+	// show correct answer to user
+	newAnswerDiv.text(currentQuestObj.answerChoices[currentQuestObj.correctAnswer]);
+
+	//  after 5 seconds, execute the showTriviaQuestion function
+    setTimeout(function() {showTriviaQuestion()}, 1000*betweenQsTime);
+
+}
 
 
 
 // ----------------------------------------------------------------------------------------------------
-// 
+// reset variables and divs views
 // ----------------------------------------------------------------------------------------------------
+function resetQuestionItems() {
 
+	// set the variables checked back to false
+	timesUp = false;
+	wrongAnswer = false;
+
+	// increment questions asked to go to next question when loaded
+	totalQuestionsAsked++;
+
+	// clear out the divs for the new question / answers to be displayed
+	newQuestionDiv.text("");
+	newAnswerDiv.text("");
+	timerDiv.text("");
+	timerCountSpan.text("");
+
+}
 
 
 
