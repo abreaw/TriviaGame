@@ -102,6 +102,8 @@ var availableQuestions = [];
 // Grab all div objects that will be updated throughout the game
 // ----------------------------------------------------------------------------------------------------
 
+// find the #msg-view div to put user msgs into
+var msgView = $("#msg-view");
 // find the #question-view div to put the question into
 var newQuestionDiv = $("#question-view");
 // find the #answer-choices div to put the answer into
@@ -109,6 +111,7 @@ var newAnswerDiv = $("#answer-choices");
 // grab timer div items
 var timerDiv = $("#timing-view");
 var timerCountSpan = $("#timer-count");
+
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -217,28 +220,29 @@ function loadAnswerView() {
 	
 }
 
+
+// ----------------------------------------------------------------------------------------------------
+//  Display the time remaining heading
+// ----------------------------------------------------------------------------------------------------
 function loadTimerView() {
 
-	// grab timer div items
-	// var timerDiv = $("#timing-view");
-	
+	console.log(timerCountSpan);
 	// add text to the timer div
 	timerDiv.prepend("Time Remaining: ");
 	timerCountSpan.text(timeRemaining);
 
 }
 
-
+// ----------------------------------------------------------------------------------------------------
+//  Display the timer count down
+// ----------------------------------------------------------------------------------------------------
 function timerCountDown() {
 
-	// var timerCountSpan = $("#timer-count");
-	
 	// add count to the user view
 	timerCountSpan.text(timeRemaining);
 	
 	if (timeRemaining === 0) {
 
-		// console.log("clearing intervalID");
 		// clear Interval timer countdown
         clearInterval(intervalID);
 
@@ -277,15 +281,15 @@ function showTriviaQuestion(isNewGame) {
 	// setup timer view
 	loadTimerView();
 
-	// // set timer to total amount available
-	// timeRemaining = totalTime;
-
 	// set up the timerCountDown function to run every sec (1000ms)
 	intervalID = setInterval(timerCountDown, 1000);
 
 }
 
 
+// ----------------------------------------------------------------------------------------------------
+//  
+// ----------------------------------------------------------------------------------------------------
 
 
 
@@ -297,19 +301,19 @@ function setupCorrectAnsView() {
 
 	// add user message to newQuestionDiv
 	if (timesUp) {
-		newQuestionDiv.text(userMessages.timesUpMsg);
+		msgView.text(userMessages.timesUpMsg);
 	}
 
 	if (wrongAnswer) {
-		newQuestionDiv.text(userMessages.wrongAnsMsg);
+		msgView.text(userMessages.wrongAnsMsg);
 	}
 
 	// show correct answer to user
 	newAnswerDiv.text(currentQuestObj.answerChoices[currentQuestObj.correctAnswer]);
 
 	//  after 5 seconds, execute the showTriviaQuestion function
-    setTimeout(function() {showTriviaQuestion()}, 1000*betweenQsTime);
-
+    setTimeout(function() {showTriviaQuestion(false)}, 1000*betweenQsTime);
+    
 }
 
 
@@ -327,11 +331,12 @@ function resetQuestionItems() {
 	totalQuestionsAsked++;
 
 	// clear out the divs for the new question / answers to be displayed
+	msgView.text("");
 	newQuestionDiv.text("");
 	newAnswerDiv.text("");
-	timerDiv.text("");
 	timerCountSpan.text("");
-
+	timerDiv.html(timerCountSpan);
+	
 }
 
 
