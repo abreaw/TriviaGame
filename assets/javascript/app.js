@@ -4,12 +4,14 @@
 // Global Variables Setup
 // ----------------------------------------------------------------------------------------------------
 
+// new game on start reset
+var newGame = true;
 // timer amount for each question
-var totalTime = 15; // 15 secs
+var totalTime = 10; // 15 secs
 // timer for between questions
-var betweenQsTime = 5; // 5 secs
+var betweenQsTime = 5; // 7 secs
 // answer selected by user (could be a local variable?)
-var answerSelected;
+var answerSelected = -1;
 // total correct answer count
 var totalCorrect = 0;
 // total incorrect answer count
@@ -21,15 +23,17 @@ var timeRemaining;
 // total # of max questions that will be asked during round
 var maxQuestionCount = 10; // 10 questions asked to the user total
 // total # of questions available
-var maxQuestionsAvailable = 4; // update this to be equal to all the question objects added below
+var maxQuestionsAvailable = 10; // update this to be equal to all the question objects added below
 // current correct answer
-var currentRightAnswer;
+var currentRightAnswer;  // may not need this
 // current question object
 var currentQuestObj;
 // times up variable
 var timesUp = false;
 // wrong answer selected variable
 var wrongAnswer = false;
+// right answer selected variable
+var rightAnswer = false;
 // timer ID
 var intervalID;
 
@@ -37,10 +41,9 @@ var intervalID;
 var userMessages = {
     // types of messages w/ values
     timesUpMsg: "Sorry you didn't select an answer in time.",
-    wrongAnsMsg: "That is not the correct answer.",
-    attackEnemy: "Click the 'Attack' button to battle.",
-    youLost: "You have been defeated! Pick wisely next time you must!",
-    youWon: "Yay! You won!",
+    wrongAnsMsg: " is the wrong answer. Sorry!",
+    rightAnsMsg: "That's right! Great job!",
+    gameOverMsg: "Thanks for playing!",
 
 };
 
@@ -84,7 +87,61 @@ var q4 = {
 	correctAnswerDetails: "",
 };
 
-// var q5 = {
+var q5 = {
+
+	question: "Which of the following items was owned by the fewest U.S. homes in 1990?",
+	answerChoices: ["A. home computer", "B. compact disk player", "C. cordless phone", "D. dishwasher"],
+	correctAnswer: 1,
+	questionTheme: "Electronics",
+	correctAnswerDetails: "",
+};
+
+var q6 = {
+
+	question: "Who holds the record for the most victories in a row on the professional golf tour?",
+	answerChoices: ["A. Jack Nicklaus", "B. Arnold Palmer", "C. Byron Nelson", "D. Ben Hogan"],
+	correctAnswer: 2,
+	questionTheme: "Sports",
+	correctAnswerDetails: "",
+};
+
+var q7 = {
+
+	question: "Who is third behind Hank Aaron and Babe Ruth in major league career home runs?",
+	answerChoices: ["A. Reggie Jackson", "B. Harmon Killebrew", "C. Willie Mays", "D. Frank Robinson"],
+	correctAnswer: 2,
+	questionTheme: "",
+	correctAnswerDetails: "",
+};
+
+var q8 = {
+
+	question: "In 1990, in what percentage of U.S. married couples did the wife earn more money than the husband?",
+	answerChoices: ["A. 8", "B. 18", "C. 38", "D. 58"],
+	correctAnswer: 1,
+	questionTheme: "",
+	correctAnswerDetails: "",
+};
+
+var q9 = {
+
+	question: "During the 1980s for six consecutive years what breed of dog was the most popular in the U.S.?",
+	answerChoices: ["A. cocker spaniel", "B. German shepherd", "C. Labrador retriever", "D. poodle"],
+	correctAnswer: 0,
+	questionTheme: "",
+	correctAnswerDetails: "",
+};
+
+var q10 = {
+
+	question: "In 1985, five percent of U.S. households had telephone answering machines. By 1990 what percentage of homes had answering machines?",
+	answerChoices: ["A. 10 percent", "B. 15 percent", "C. 31 percent", "D. 51 percent"],
+	correctAnswer: 2,
+	questionTheme: "",
+	correctAnswerDetails: "",
+};
+
+// var q? = {
 
 // 	question: "",
 // 	answerChoices: ["", "", "", ""],
@@ -120,8 +177,6 @@ var timerCountSpan = $("#timer-count");
 
 // get questions into the array for game play
 loadAvailableQuestions();
-// create the button for the user to start the game
-getStarted();
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -135,7 +190,9 @@ function loadAvailableQuestions() {
 		availableQuestions.push(eval("q"+(i+1))); // eval turns the string into a variable name
 	}
 
-	// console.log(availableQuestions);
+	// create the button for the user to start the game
+	getStarted();
+
 }
 
 
@@ -144,7 +201,7 @@ function loadAvailableQuestions() {
 // ----------------------------------------------------------------------------------------------------
 function getStarted () {
 
-	var startDiv = $("#timing-view");
+	var startDiv = $("#contents");
 	var startBtn = $("<button>");
 
 	startBtn.attr("id", "start-btn");
@@ -162,20 +219,47 @@ $("#start-btn").on("click", function() {
 
 	console.log("start button clicked");
 	
-	// do {
+	showTriviaQuestion(newGame);
 
-	showTriviaQuestion(true);
+	// no longer new game so set to false
+	newGame = false;
 
-	// } while (!timesUp && totalQuestionsAsked <= maxQuestionsAvailable);
-		
-	// // setup the question view
-	// loadQuestionView();
-	// // setup the answers for the new question
-	// loadAnswerView();
 	$("#start-btn").css("visibility","hidden");
 
 });
 
+
+
+// ----------------------------------------------------------------------------------------------------
+//  when an answer div clicked
+// ----------------------------------------------------------------------------------------------------
+$("#answer-choices").on("click", ".answer-btns", function() {  
+
+	console.log("answer clicked");
+
+	// set answer selected by the user to the answerSelected variable
+	answerSelected = $(this).attr("id");
+
+	console.log(answerSelected);
+	
+	// check answer selected against the currentQuestObj.correctAnswer
+	if (answerSelected == currentQuestObj.correctAnswer) {
+
+		console.log("correct answer guessed");
+		rightAnswer = true;
+		totalCorrect++;
+
+	} else {
+
+		console.log("not the correct answer guessed");
+		wrongAnswer = true;
+		totalIncorrect++;
+
+	}
+
+	// setupCorrectAnsView();
+
+});
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -205,7 +289,7 @@ function loadAnswerView() {
 	for (var i = 0; i < currentQuestObj.answerChoices.length; i++) { 
 		
 		// create new divs with each answer choice inside
-		var newAnswerChoiceDiv = $("<div>");
+		var newAnswerChoiceDiv = $("<button class='answer-btns'>");
 		// add the answer choice text to the new div
 		newAnswerChoiceDiv.text(currentQuestObj.answerChoices[i]);
 		// add an id to the answer choice div
@@ -213,6 +297,8 @@ function loadAnswerView() {
 
 		// add the new answer choice div to the answer view
 		newAnswerDiv.append(newAnswerChoiceDiv);
+
+		newAnswerDiv.append("<br>");
 
 		// console.log(newAnswerChoices);
 		
@@ -241,16 +327,18 @@ function timerCountDown() {
 	// add count to the user view
 	timerCountSpan.text(timeRemaining);
 	
-	if (timeRemaining === 0) {
+	if (timeRemaining === 0 || answerSelected > -1) {
 
 		// clear Interval timer countdown
         clearInterval(intervalID);
 
-        // tell user time is up
-        timerCountSpan.text("Times Up!");
+        if (timeRemaining === 0) {
+	        // tell user time is up
+	        timerCountSpan.text("Times Up!");
 
-        // set timesUp variable to true
-        timesUp = true;
+	        // set timesUp variable to true
+	        timesUp = true;
+	    }
 
         // run correct answer view
         setupCorrectAnsView();
@@ -274,23 +362,31 @@ function showTriviaQuestion(isNewGame) {
 	// set timer to total amount available
 	timeRemaining = totalTime;
 
-	// setup the question view
-	loadQuestionView();
-	// setup the answers for the new question
-	loadAnswerView();
-	// setup timer view
-	loadTimerView();
+	// check to see if all questions have been asked
+	if (totalQuestionsAsked === maxQuestionsAvailable || totalQuestionsAsked === maxQuestionCount) {
 
-	// set up the timerCountDown function to run every sec (1000ms)
-	intervalID = setInterval(timerCountDown, 1000);
+		// setup game over view w/ stats
+		roundOverView();
+
+	} else {
+
+		// setup the question view
+		loadQuestionView();
+		// setup the answers for the new question
+		loadAnswerView();
+		// setup timer view
+		loadTimerView();
+
+		// set up the timerCountDown function to run every sec (1000ms)
+		intervalID = setInterval(timerCountDown, 1000);
+
+		console.log("total questions asked = " + totalQuestionsAsked);
+
+		// increment questions asked to go to next question when loaded
+		totalQuestionsAsked++;
+	}
 
 }
-
-
-// ----------------------------------------------------------------------------------------------------
-//  
-// ----------------------------------------------------------------------------------------------------
-
 
 
 
@@ -305,14 +401,18 @@ function setupCorrectAnsView() {
 	}
 
 	if (wrongAnswer) {
-		msgView.text(userMessages.wrongAnsMsg);
+		msgView.text("Your guess of "+ currentQuestObj.answerChoices[answerSelected] + " " + userMessages.wrongAnsMsg);
+	}
+
+	if (rightAnswer) {
+		msgView.text(userMessages.rightAnsMsg);
 	}
 
 	// show correct answer to user
 	newAnswerDiv.text(currentQuestObj.answerChoices[currentQuestObj.correctAnswer]);
 
 	//  after 5 seconds, execute the showTriviaQuestion function
-    setTimeout(function() {showTriviaQuestion(false)}, 1000*betweenQsTime);
+    setTimeout(function() {showTriviaQuestion(newGame)}, 1000*betweenQsTime);
     
 }
 
@@ -326,9 +426,8 @@ function resetQuestionItems() {
 	// set the variables checked back to false
 	timesUp = false;
 	wrongAnswer = false;
-
-	// increment questions asked to go to next question when loaded
-	totalQuestionsAsked++;
+	rightAnswer = false;
+	answerSelected = -1;
 
 	// clear out the divs for the new question / answers to be displayed
 	msgView.text("");
@@ -339,7 +438,28 @@ function resetQuestionItems() {
 	
 }
 
+// ----------------------------------------------------------------------------------------------------
+// Round / Game Over
+// ----------------------------------------------------------------------------------------------------
+function roundOverView() {
 
+	// call reset Question Items ??
+	resetQuestionItems();
+	
+	// show stats view to user
+	msgView.text(userMessages.gameOverMsg);
+	newQuestionDiv.text("Out of " + totalQuestionsAsked + " questions.");
+	newAnswerDiv.text("You got " + totalCorrect + " correct. That is " + (totalCorrect/totalQuestionsAsked)*100 + "% right.");
+	newAnswerDiv.append("<br>You got " + totalIncorrect + " wrong. That is " + (totalIncorrect/totalQuestionsAsked)*100 + "% wrong.");
+
+	// reset totalQuestions & other global counters
+	totalIncorrect = 0;
+	totalCorrect = 0;
+	totalQuestionsAsked = 0;
+
+	// show start button to replay ... might add this later for future rounds to be played
+	// $("#start-btn").css("visibility","visible");
+}
 
 
 // ----------------------------------------------------------------------------------------------------

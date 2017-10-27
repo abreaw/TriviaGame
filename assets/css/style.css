@@ -1,0 +1,51 @@
+
+body {
+	text-align: center;
+}
+
+.heading-styles {
+	
+	background-color: #6f5499;
+	color: #cdbfe3;
+}
+
+#msg-view {
+
+	/*text-align: center;*/
+	font-size: 2em;
+	color: DeepSkyBlue;
+}
+
+#timing-view {
+
+	/*text-align: center;*/
+	font-size: 2em;
+}
+
+#question-view {
+
+	/*text-align: center;*/
+	font-size: 1.5em;
+	color: #6f5499;
+
+}
+
+#answer-choices {
+
+	/*text-align: center;*/
+	font-size: 1em;
+	color: DeepSkyBlue;
+}
+
+.answer-btns {
+
+	padding: 5px;
+	margin: 5px;
+	width: 100%;
+}
+
+.answer-btns:hover {
+
+	background-color: #cdbfe3;
+	color: gray;
+}

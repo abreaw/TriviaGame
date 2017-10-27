@@ -6,7 +6,10 @@
 	<title>Trivia Game</title>
 
 	<!-- Link to bootstrap if needed -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
 	<!-- Link to CSS Stylesheet if needed -->
+	<link rel="stylesheet" href="assets/css/style.css">
 
 	<!-- Link to jQuery if needed -->
 	<script src="https://code.jquery.com/jquery-3.2.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
@@ -15,13 +18,20 @@
 <body>
 
 	<div id="container">
-		<h1>Totally Trivia!</h1>
-		<div id="contents">
-			<!-- Question / Answer views here -->
-			<div id="timing-view"><span id="timer-count"></span></div>
-			<div id="msg-view"></div>
-			<div id="question-view"></div>
-			<div id="answer-choices"></div>
+		<div class="jumbotron page-header heading-styles">			 
+			<h1>Totally Trivia!</h1>
+		 </div>
+
+		 <div class="row">
+			<div class="col-md-5 col-sm-5 col-md-offset-4">		
+				<div id="contents">
+					<!-- Question / Answer views here -->
+					<div id="timing-view" class="panel"><span id="timer-count"></span></div>
+					<div id="msg-view" class="panel"></div>
+					<div id="question-view" class="panel"></div>
+					<div id="answer-choices"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 
